@@ -1,9 +1,11 @@
 import React, { ChangeEvent, useState } from "react";
 import { IInput } from "./types";
 import axios from "axios";
+import "./app.scss";
 import { Button } from "react-bootstrap";
 import FileInput from "./components/FileInput";
 import InputList from "./components/InputList";
+import DownloadLink from "./components/DownloadLink";
 
 function App() {
 	const inputsInitialState = [
@@ -53,6 +55,16 @@ function App() {
 			.catch((err) => console.log(err));
 	};
 
+	const downloadHandler = () => {
+		axios
+			.post("http://127.0.0.1:4444/delete", {
+				downloadPath,
+			})
+			.then((res) => console.log(res))
+			.catch((err) => console.error(err));
+		setDownloadPath("");
+	};
+
 	const changeInputsNameHandler = (e: ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.currentTarget;
 		const index = inputs.findIndex((input) => input.id === Number(name));
@@ -83,11 +95,12 @@ function App() {
 	};
 
 	const removeLastInputHandler = () => {
+		if (inputs.length <= 1) return;
 		setInputs((prev) => prev.splice(0, prev.length - 1));
 	};
 
 	return (
-		<>
+		<div className='app'>
 			<FileInput change={fileInputHandler} />
 			<InputList
 				inputs={inputs}
@@ -112,23 +125,9 @@ function App() {
 				</Button>
 			)}
 			{downloadPath && (
-				<a
-					onClick={() => {
-						axios
-							.post("http://127.0.0.1:4444/delete", {
-								downloadPath,
-							})
-							.then((res) => console.log(res))
-							.catch((err) => console.error(err));
-						setDownloadPath("");
-					}}
-					href={downloadPath}
-					download
-				>
-					Download Changed Word file
-				</a>
+				<DownloadLink path={downloadPath} click={downloadHandler} />
 			)}
-		</>
+		</div>
 	);
 }
 

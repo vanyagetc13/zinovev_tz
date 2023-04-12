@@ -6,4 +6,4 @@ import "./Assets/css/index.scss";
 const root = ReactDOM.createRoot(
 	document.getElementById("root") as HTMLElement
 );
-root.render(<App />);
+root.render(<App/>);
