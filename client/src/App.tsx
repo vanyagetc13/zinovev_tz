@@ -20,8 +20,8 @@ function App() {
 
 	const fileInputHandler = (e: ChangeEvent<HTMLInputElement>) => {
 		const FileList = e.currentTarget.files;
-		if (FileList) {
-			const file = FileList[0];
+		if (FileList && FileList.length > 0) {
+			const file: File = FileList[0];
 			const { lastModified, name } = file;
 			const path = `${lastModified} ${name}`;
 			setFile(file);
@@ -54,13 +54,13 @@ function App() {
 			)
 			.then((res) => {
 				if (res.status === 200) {
-					const path = res.data.replace("/client/public", "")
-					const link = document.createElement('a')
+					const path = res.data.replace("/client/public", "");
+					const link = document.createElement("a");
 					link.href = path;
-					link.setAttribute('download', `${file?.name}`)
-					link.click()
+					link.setAttribute("download", `${file?.name}`);
+					link.click();
 					link.parentNode?.removeChild(link);
-					cleanUpHandler(path)
+					cleanUpHandler(path);
 				}
 			})
 			.catch((err) => console.log(err));
