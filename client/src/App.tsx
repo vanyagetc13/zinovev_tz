@@ -1,18 +1,35 @@
-import React, { useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import { IInput } from "./types";
 import axios from "axios";
-import Button from "react-bootstrap/Button";
-import { Container } from "react-bootstrap";
-import Col from "react-bootstrap/esm/Col";
-import Row from "react-bootstrap/esm/Row";
+import { Button } from "react-bootstrap";
+import FileInput from "./components/FileInput";
+import InputList from "./components/InputList";
 
 function App() {
+	const inputsInitialState = [
+		{
+			id: 0,
+			name: "",
+			value: "",
+		},
+	];
 	const [file, setFile] = useState<File>();
-	const [inputs, setInputs] = useState<Array<IInput>>([]);
+	const [inputs, setInputs] = useState<Array<IInput>>(inputsInitialState);
 	const [path, setPath] = useState<string>("");
 	const [downloadPath, setDownloadPath] = useState<string>("");
 
-	const makeSomeDuty = () => {
+	const fileInputHandler = (e: ChangeEvent<HTMLInputElement>) => {
+		const FileList = e.currentTarget.files;
+		if (FileList) {
+			const file = FileList[0];
+			const { lastModified, name } = file;
+			const path = `${lastModified} ${name}`;
+			setFile(file);
+			setPath(path);
+		}
+	};
+
+	const sendFileHandler = () => {
 		const inputsFormData = JSON.stringify(inputs);
 		axios
 			.post(
@@ -36,6 +53,25 @@ function App() {
 			.catch((err) => console.log(err));
 	};
 
+	const changeInputsNameHandler = (e: ChangeEvent<HTMLInputElement>) => {
+		const { name, value } = e.currentTarget;
+		const index = inputs.findIndex((input) => input.id === Number(name));
+		setInputs((prev) => {
+			const newArray = [...prev];
+			newArray[index].name = value;
+			return newArray;
+		});
+	};
+	const changeInputsValueHandler = (e: ChangeEvent<HTMLInputElement>) => {
+		const { name, value } = e.currentTarget;
+		const index = inputs.findIndex((input) => input.id === Number(name));
+		setInputs((prev) => {
+			const newArray = [...prev];
+			newArray[index].value = value;
+			return newArray;
+		});
+	};
+
 	const addInputHandler = () => {
 		const ID = Number(new Date());
 		const newInput: IInput = {
@@ -47,85 +83,34 @@ function App() {
 	};
 
 	const removeLastInputHandler = () => {
-		if (!inputs.length) return;
 		setInputs((prev) => prev.splice(0, prev.length - 1));
 	};
 
 	return (
 		<>
-			<Container>
-				<input
-					type='file'
-					onChange={(e) => {
-						const FileList = e.currentTarget.files;
-						if (FileList) {
-							const file = FileList[0];
-							const { lastModified, name } = file;
-							const path = `${lastModified} ${name}`;
-							setFile(file);
-							setPath(path);
-						}
-					}}
-					accept='.docx'
-				/>
-			</Container>
-			<Container fluid='true' className='p-3'>
-				<Col>
-					{inputs.map((input) => (
-						<Row key={input.id}>
-							<input
-								className='input'
-								type='text'
-								value={input.name}
-								placeholder='Переменная'
-								name={input.id.toString()}
-								onChange={(e) => {
-									const { name, value } = e.currentTarget;
-									const index = inputs.findIndex(
-										(input) => input.id === Number(name)
-									);
-									setInputs((prev) => {
-										const newArray = [...prev];
-										newArray[index].name = value;
-										return newArray;
-									});
-								}}
-							/>
-							<input
-								className='input'
-								type='text'
-								value={input.value}
-								placeholder='Значение'
-								name={input.id.toString()}
-								onChange={(e) => {
-									const { name, value } = e.currentTarget;
-									const index = inputs.findIndex(
-										(input) => input.id === Number(name)
-									);
-									setInputs((prev) => {
-										const newArray = [...prev];
-										newArray[index].value = value;
-										return newArray;
-									});
-								}}
-							/>
-						</Row>
-					))}
-				</Col>
-			</Container>
+			<FileInput change={fileInputHandler} />
+			<InputList
+				inputs={inputs}
+				changeName={changeInputsNameHandler}
+				changeValue={changeInputsValueHandler}
+			/>
 			<div className='buttons'>
 				<Button variant='success' size='sm' onClick={addInputHandler}>
-					+
+					Добавить новую пару
 				</Button>
 				<Button
 					variant='danger'
 					size='sm'
 					onClick={removeLastInputHandler}
 				>
-					-
+					Удалить последнюю пару
 				</Button>
 			</div>
-			<div>{file && <button onClick={makeSomeDuty}>click</button>}</div>
+			{file && (
+				<Button variant='primary' onClick={sendFileHandler}>
+					Send file to Server!
+				</Button>
+			)}
 			{downloadPath && (
 				<a
 					onClick={() => {
@@ -140,7 +125,7 @@ function App() {
 					href={downloadPath}
 					download
 				>
-					download
+					Download Changed Word file
 				</a>
 			)}
 		</>
