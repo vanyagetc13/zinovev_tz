@@ -6,7 +6,7 @@ interface FileInputProps {
 }
 
 const FileInput = ({ change }: FileInputProps) => {
-	return <input type='file' onChange={change} accept='.docx' />;
+	return <input type='file' onChange={change} accept='.docx' className="p-0"/>;
 };
 
 export default FileInput;

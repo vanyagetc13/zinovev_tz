@@ -1,11 +1,9 @@
 import React, { ChangeEvent, useState } from "react";
 import { IInput } from "./types";
 import axios from "axios";
-import "./app.scss";
-import { Button } from "react-bootstrap";
+import { Button, Col, Container, Row } from "react-bootstrap";
 import FileInput from "./components/FileInput";
 import InputList from "./components/InputList";
-import DownloadLink from "./components/DownloadLink";
 
 function App() {
 	const inputsInitialState = [
@@ -15,10 +13,10 @@ function App() {
 			value: "",
 		},
 	];
+
 	const [file, setFile] = useState<File>();
 	const [inputs, setInputs] = useState<Array<IInput>>(inputsInitialState);
 	const [path, setPath] = useState<string>("");
-	const [downloadPath, setDownloadPath] = useState<string>("");
 
 	const fileInputHandler = (e: ChangeEvent<HTMLInputElement>) => {
 		const FileList = e.currentTarget.files;
@@ -30,7 +28,14 @@ function App() {
 			setPath(path);
 		}
 	};
-
+	const cleanUpHandler = (path: string) => {
+		axios
+			.post("http://127.0.0.1:4444/delete", {
+				path,
+			})
+			.then((res) => console.log(res))
+			.catch((err) => console.error(err));
+	};
 	const sendFileHandler = () => {
 		const inputsFormData = JSON.stringify(inputs);
 		axios
@@ -49,20 +54,16 @@ function App() {
 			)
 			.then((res) => {
 				if (res.status === 200) {
-					setDownloadPath(res.data.replace("/client/public", ""));
+					const path = res.data.replace("/client/public", "")
+					const link = document.createElement('a')
+					link.href = path;
+					link.setAttribute('download', `${file?.name}`)
+					link.click()
+					link.parentNode?.removeChild(link);
+					cleanUpHandler(path)
 				}
 			})
 			.catch((err) => console.log(err));
-	};
-
-	const downloadHandler = () => {
-		axios
-			.post("http://127.0.0.1:4444/delete", {
-				downloadPath,
-			})
-			.then((res) => console.log(res))
-			.catch((err) => console.error(err));
-		setDownloadPath("");
 	};
 
 	const changeInputsNameHandler = (e: ChangeEvent<HTMLInputElement>) => {
@@ -100,34 +101,43 @@ function App() {
 	};
 
 	return (
-		<div className='app'>
-			<FileInput change={fileInputHandler} />
-			<InputList
-				inputs={inputs}
-				changeName={changeInputsNameHandler}
-				changeValue={changeInputsValueHandler}
-			/>
-			<div className='buttons'>
-				<Button variant='success' size='sm' onClick={addInputHandler}>
-					Добавить новую пару
-				</Button>
-				<Button
-					variant='danger'
-					size='sm'
-					onClick={removeLastInputHandler}
-				>
-					Удалить последнюю пару
-				</Button>
-			</div>
-			{file && (
-				<Button variant='primary' onClick={sendFileHandler}>
-					Send file to Server!
-				</Button>
-			)}
-			{downloadPath && (
-				<DownloadLink path={downloadPath} click={downloadHandler} />
-			)}
-		</div>
+		<Container fluid className='p-5 d-flex'>
+			<Col className='gap-3 d-flex flex-column m-0'>
+				<Row className='m-0'>
+					<FileInput change={fileInputHandler} />
+				</Row>
+				<Row className='d-flex flex-column gap-3 p-0 m-0'>
+					<InputList
+						inputs={inputs}
+						changeName={changeInputsNameHandler}
+						changeValue={changeInputsValueHandler}
+					/>
+				</Row>
+				<Row className='d-flex gap-2 mt-4 m-0 w-auto'>
+					<Button
+						variant='success'
+						size='sm'
+						onClick={addInputHandler}
+					>
+						Добавить новую пару
+					</Button>
+					<Button
+						variant='danger'
+						size='sm'
+						onClick={removeLastInputHandler}
+					>
+						Удалить последнюю пару
+					</Button>
+				</Row>
+				{file && (
+					<Row className='w-auto m-0'>
+						<Button variant='primary' onClick={sendFileHandler}>
+							Send file to Server!
+						</Button>
+					</Row>
+				)}
+			</Col>
+		</Container>
 	);
 }
 

@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { IInput } from "../types";
 import { ChangeEvent } from "react";
+import { Col, Row } from "react-bootstrap";
 
 interface InputListProps {
 	inputs: IInput[];
@@ -9,27 +10,48 @@ interface InputListProps {
 }
 
 const InputList = ({ inputs, changeName, changeValue }: InputListProps) => {
+	const [width, setWidth] = useState<number>(window.innerWidth);
+
+	function handleWindowSizeChange() {
+		setWidth(window.innerWidth);
+	}
+	useEffect(() => {
+		window.addEventListener("resize", handleWindowSizeChange);
+		return () => {
+			window.removeEventListener("resize", handleWindowSizeChange);
+		};
+	}, []);
+	const isMobile = width <= 768;
 	return (
 		<>
 			{inputs.map((input) => (
-				<div key={input.id}>
-					<input
-						className='input'
-						type='text'
-						value={input.name}
-						placeholder='Переменная'
-						name={input.id.toString()}
-						onChange={changeName}
-					/>
-					<input
-						className='input'
-						type='text'
-						value={input.value}
-						placeholder='Значение'
-						name={input.id.toString()}
-						onChange={changeValue}
-					/>
-				</div>
+				<Row
+					className={
+						"p-0 m-0 " + (isMobile ? "flex-column w-100 gap-1" : "")
+					}
+					key={input.id}
+				>
+					<Col xs={isMobile ? undefined : 5} className='p-1'>
+						<input
+							className='w-100'
+							type='text'
+							value={input.name}
+							placeholder='Переменная'
+							name={input.id.toString()}
+							onChange={changeName}
+						/>
+					</Col>
+					<Col xs={isMobile ? undefined : 7} className='p-1'>
+						<input
+							className='w-100'
+							type='text'
+							value={input.value}
+							placeholder='Значение'
+							name={input.id.toString()}
+							onChange={changeValue}
+						/>
+					</Col>
+				</Row>
 			))}
 		</>
 	);
