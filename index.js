@@ -40,6 +40,12 @@ app.post("/file", (req, res) => {
 		const file = req.files.file;
 		const { path, inputsFormData } = req.body;
 		const inputs = JSON.parse(inputsFormData);
+		if (!inputs[0].name || !inputs[0].value)
+			return res
+				.status(404)
+				.json(
+					"Оба поля('переменная', 'значение') должны быть заполнены"
+				);
 		const doc = new Document(file.data);
 		const arrayOfText = [];
 		itteration(doc, (keys, vnode) => {
@@ -82,6 +88,7 @@ app.post("/file", (req, res) => {
 			let str = "";
 			let data = [];
 			for (let i = 0; i < arrayOfKeys.length; i++) {
+				console.log(arrayOfKeys[i].text);
 				let t = arrayOfKeys[i].text;
 				if (t.includes(".")) {
 					t = t.replace(".", "");
@@ -118,10 +125,10 @@ app.post("/file", (req, res) => {
 		}
 		const fullPath = "./client/public/files/" + Number(new Date()) + path;
 		doc.save(fullPath);
-		res.status(200).json(fullPath);
+		return res.status(200).json(fullPath);
 	} catch (err) {
 		console.log(err);
-		res.status(500).json(err);
+		return res.status(500).json(err);
 	}
 });
 
@@ -132,10 +139,10 @@ app.post("/delete", (req, res) => {
 			path = path.replace("./files", "./client/public/files");
 		}
 		fs.unlinkSync(path);
-		res.status(200).json(`${path} file deleted`);
+		return res.status(200).json(`${path} file deleted`);
 	} catch (err) {
 		console.log(err);
-		res.status(500).json(err);
+		return res.status(500).json(err);
 	}
 });
 

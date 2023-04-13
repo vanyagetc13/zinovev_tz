@@ -17,7 +17,7 @@ function App() {
 	const [file, setFile] = useState<File>();
 	const [inputs, setInputs] = useState<Array<IInput>>(inputsInitialState);
 	const [path, setPath] = useState<string>("");
-	const [error, setError] = useState<IError>();
+	const [error, setError] = useState<IError | null>(null);
 
 	const fileInputHandler = (e: ChangeEvent<HTMLInputElement>) => {
 		const FileList = e.currentTarget.files;
@@ -59,20 +59,18 @@ function App() {
 				}
 			)
 			.then((res) => {
-				console.log(res);
-				if (res.status === 200) {
-					const path = res.data.replace("/client/public", "");
-					const link = document.createElement("a");
-					link.href = path;
-					link.setAttribute("download", `${file?.name}`);
-					link.click();
-					link.parentNode?.removeChild(link);
-					cleanUpHandler(path);
-				}
+				setError(null);
+				const path = res.data.replace("/client/public", "");
+				const link = document.createElement("a");
+				link.href = path;
+				link.setAttribute("download", `${file?.name}`);
+				link.click();
+				link.parentNode?.removeChild(link);
+				cleanUpHandler(path);
 			})
 			.catch((err) => {
 				setError({
-					message: err.message,
+					message: err.response.data || err.message,
 					code: err.response.status,
 					text: err.response.statusText,
 				});
