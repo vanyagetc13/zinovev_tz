@@ -33,7 +33,7 @@ const InputList = ({ inputs, changeName, changeValue }: InputListProps) => {
 				>
 					<Col xs={isMobile ? undefined : 5} className='p-1'>
 						<input
-							className='w-100'
+							className='w-100 p-2'
 							type='text'
 							value={input.name}
 							placeholder='Переменная'
@@ -43,7 +43,7 @@ const InputList = ({ inputs, changeName, changeValue }: InputListProps) => {
 					</Col>
 					<Col xs={isMobile ? undefined : 7} className='p-1'>
 						<input
-							className='w-100'
+							className='w-100 p-2'
 							type='text'
 							value={input.value}
 							placeholder='Значение'

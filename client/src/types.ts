@@ -3,3 +3,9 @@ export interface IInput {
 	name: string;
 	value: string;
 }
+
+export interface IError {
+	code: number;
+	message: string;
+	text: string;
+}

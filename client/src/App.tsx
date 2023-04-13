@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useState } from "react";
-import { IInput } from "./types";
+import { IError, IInput } from "./types";
 import axios from "axios";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import FileInput from "./components/FileInput";
@@ -17,6 +17,7 @@ function App() {
 	const [file, setFile] = useState<File>();
 	const [inputs, setInputs] = useState<Array<IInput>>(inputsInitialState);
 	const [path, setPath] = useState<string>("");
+	const [error, setError] = useState<IError>();
 
 	const fileInputHandler = (e: ChangeEvent<HTMLInputElement>) => {
 		const FileList = e.currentTarget.files;
@@ -33,8 +34,13 @@ function App() {
 			.post("http://127.0.0.1:4444/delete", {
 				path,
 			})
-			.then((res) => console.log(res))
-			.catch((err) => console.error(err));
+			.catch((err) =>
+				setError({
+					message: err.message,
+					code: err.response.status,
+					text: err.response.statusText,
+				})
+			);
 	};
 	const sendFileHandler = () => {
 		const inputsFormData = JSON.stringify(inputs);
@@ -53,6 +59,7 @@ function App() {
 				}
 			)
 			.then((res) => {
+				console.log(res);
 				if (res.status === 200) {
 					const path = res.data.replace("/client/public", "");
 					const link = document.createElement("a");
@@ -63,9 +70,14 @@ function App() {
 					cleanUpHandler(path);
 				}
 			})
-			.catch((err) => console.log(err));
+			.catch((err) => {
+				setError({
+					message: err.message,
+					code: err.response.status,
+					text: err.response.statusText,
+				});
+			});
 	};
-
 	const changeInputsNameHandler = (e: ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.currentTarget;
 		const index = inputs.findIndex((input) => input.id === Number(name));
@@ -84,7 +96,6 @@ function App() {
 			return newArray;
 		});
 	};
-
 	const addInputHandler = () => {
 		const ID = Number(new Date());
 		const newInput: IInput = {
@@ -94,7 +105,6 @@ function App() {
 		};
 		setInputs((prev) => [...prev, newInput]);
 	};
-
 	const removeLastInputHandler = () => {
 		if (inputs.length <= 1) return;
 		setInputs((prev) => prev.splice(0, prev.length - 1));
@@ -122,7 +132,7 @@ function App() {
 						Добавить новую пару
 					</Button>
 					<Button
-						variant='danger'
+						variant='secondary'
 						size='sm'
 						onClick={removeLastInputHandler}
 					>
@@ -135,6 +145,14 @@ function App() {
 							Send file to Server!
 						</Button>
 					</Row>
+				)}
+				{error && (
+					<div className='text-danger'>
+						<h5>
+							{error.code} | {error.text}
+						</h5>
+						<p>{error.message}</p>
+					</div>
 				)}
 			</Col>
 		</Container>

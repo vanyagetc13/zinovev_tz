@@ -40,16 +40,12 @@ app.post("/file", (req, res) => {
 		const file = req.files.file;
 		const { path, inputsFormData } = req.body;
 		const inputs = JSON.parse(inputsFormData);
-		if (!file || !path || !inputsFormData || !inputs)
-			res.status(404).json("Один из параметров указан неверно");
 		const doc = new Document(file.data);
-
 		const arrayOfText = [];
 		itteration(doc, (keys, vnode) => {
 			const t = vnode.data;
 			if (t) arrayOfText.push({ keys, text: t });
 		});
-
 		const results = [];
 		for (let j = 0; j < inputs.length; j++) {
 			let startIndex = -1;
@@ -82,7 +78,6 @@ app.post("/file", (req, res) => {
 				arrayOfKeys.push(arrayOfText[j]);
 			}
 		}
-
 		for (let j = 0; j < inputs.length; j++) {
 			let str = "";
 			let data = [];
@@ -121,7 +116,6 @@ app.post("/file", (req, res) => {
 				}
 			}
 		}
-
 		const fullPath = "./client/public/files/" + Number(new Date()) + path;
 		doc.save(fullPath);
 		res.status(200).json(fullPath);
@@ -133,7 +127,7 @@ app.post("/file", (req, res) => {
 
 app.post("/delete", (req, res) => {
 	try {
-		let path = req.body.downloadPath;
+		let path = req.body.path;
 		if (!path.includes("/client/public")) {
 			path = path.replace("./files", "./client/public/files");
 		}
