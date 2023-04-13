@@ -31,7 +31,7 @@ function App() {
 	};
 	const cleanUpHandler = (path: string) => {
 		axios
-			.post("http://127.0.0.1:4444/delete", {
+			.post("http://127.0.0.1:4444/file/delete", {
 				path,
 			})
 			.catch((err) =>

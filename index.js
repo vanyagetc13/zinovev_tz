@@ -132,7 +132,7 @@ app.post("/file", (req, res) => {
 	}
 });
 
-app.post("/delete", (req, res) => {
+app.post("/file/delete", (req, res) => {
 	try {
 		let path = req.body.path;
 		if (!path.includes("/client/public")) {
